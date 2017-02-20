@@ -138,9 +138,10 @@ def Hxy(P):
     return -HXY
 
 
-def Hmarginal(X):
+def entropia(X):
     """
-    Calcula la entropia marginal del conjunto de datos X
+    Calcula la entropia de la secuencia en el atributo X
+    esta puede ser una cadena 
     """
     P = prob(X)
     return H(P[0])
@@ -189,23 +190,4 @@ def imc(X,Y):
     Ic = I + delta
     return (Ic, I, delta)
 
-def ganancia(S,A,verbose=False):
-    """
-    calcula la funcion Ganancia con el conjunto de datos de la clase S
-    y el conjunto de atributos A
-    """
-    hs = Hmarginal(S)
-    P=prob(A)
-    G=dict()
-    for val in zip(A,S):
-        L=G.get(val[0],[])
-        L.append(val[1])
-        G[val[0]]=L
-    if verbose: print(P[0]); print(G)
-    H=0.0
-    for val in P[0]:
-        if verbose: print(val); print(P[0][val]); print(G[val]); print(Hmarginal(G[val])); print(P[0][val]*Hmarginal(G[val]))
-        H += P[0][val]*Hmarginal(G[val])
-
-    return hs-H
 

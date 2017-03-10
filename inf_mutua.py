@@ -1,13 +1,13 @@
 #!/usr/bin/python2.5
 #-*- coding:utf-8 -*-
 
-import math, random
+import math, random, numpy as np
 
 
 def discreto(var, vmax, vmin, n_edos):
     """
     discretiza la variable v dentro
-    del rango establecido por max y  min 
+    del rango establecido por max y  min
     con la cantidad de estados definidos en n_edos
 
     regresa dig: un entero que var discretizada
@@ -22,23 +22,22 @@ def discreto(var, vmax, vmin, n_edos):
     return dig
 
 
-def discretiza(V, n): 
+def discretiza(V, n):
     """
-    Esta función los valores descritos en V en 
+    Esta función los valores descritos en V en
     n estados distintos
     """
     mx = max(V)
     mn = min(V)
-    rango = mx - mn
-    dt = 1.*rango / n
-    Vp = V + mn
-    Vp /= dt
-    return int(Vp)
+    Vp = np.zeros(V.shape)
+    for idx in range(len(V)):
+        Vp[idx] = discreto(V[idx],mx,mn,n)
+    return (Vp)
 
 
 def prob(X):
     """
-    determina la probabiliad de los elementos en 
+    determina la probabiliad de los elementos en
     el conjunto X
 
     regresa [P, N, M]: un vector con 3 objetos:
@@ -67,11 +66,11 @@ def prob(X):
 
 def prconj(X,Y):
     """
-    determina la probabilidad conjunta 
+    determina la probabilidad conjunta
     entre los conjuntos X e Y que deben estar
     discretizados
 
-    Calcula 
+    Calcula
     p(X,Y)=p(X=x,Y=y)
 
     regresa [PX, PY, PXY]:
@@ -91,7 +90,7 @@ def prconj(X,Y):
             D[X[i],Y[i]] =  D.get((X[i],Y[i]),0) + 1
             tot += 1
 
-    #determinamos la probabilidad de aparicion de cada 
+    #determinamos la probabilidad de aparicion de cada
     #elemento conjunto
     for idx in D:
         D[idx] /= float(tot)
@@ -103,7 +102,7 @@ def prconj(X,Y):
 
 def H(X):
     """
-    Regresa la Entropia de Shannon de p en los estados que deben venir 
+    Regresa la Entropia de Shannon de p en los estados que deben venir
     en un diccionario como esta definido in prob, las unidades de
     H esta en bits
 
@@ -141,7 +140,7 @@ def Hxy(P):
 def entropia(X):
     """
     Calcula la entropia de la secuencia en el atributo X
-    esta puede ser una cadena 
+    esta puede ser una cadena
     """
     P = prob(X)
     return H(P[0])
@@ -168,11 +167,12 @@ def inf_mutua(H1, H2, HXY):
 
 def im(X,Y):
     """
-    calcula la información mutua entre el conjunto de datos 
-    X e Y 
+    calcula la información mutua entre el conjunto de datos
+    X e Y
     """
-    h1 = Hmarginal(X)
-    h2 = Hmarginal(Y)
+    PX, PY, PXY, M = prconj(X,Y)
+    #print(PX)
+    h1, h2 = H(PX), H(PY)
     hxy = Hconj(X,Y)
     return inf_mutua(h1,h2,hxy)
 

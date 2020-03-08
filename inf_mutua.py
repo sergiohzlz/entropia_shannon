@@ -46,7 +46,6 @@ def prob(X):
     M. cantidad de simbolos con probabilidad no nula
     """
     D = {} #diccionario donde guardamos la ocurrencia de cada simbolo
-    P = {} #diccionario donde van a estar las probabilidades
     N = len(X)
     M = []
 
@@ -54,14 +53,13 @@ def prob(X):
     for x in X:
         D[x] = D.get(x,0)+1
 
+    for d in D:
+        D[d] = D[d] / N
+
     #determinamos probabilidades
-    for i in range(len(D)):
-        P[D.keys()[i]] = 0
-        P[D.keys()[i]] = float(D.values()[i]) / N
+    M = list(filter( lambda x: D[x]>0, D))
 
-    M = filter( lambda x: P[x]>0, P)
-
-    return [P, N, len(M)]
+    return D
 
 
 def prconj(X,Y):
@@ -78,29 +76,25 @@ def prconj(X,Y):
     PY: probabilidad de aparicion de Y
     PXY: probabilidad conjunta de los sistemas X e Y
     """
-    [PX,NX,MX] = prob(X)
-    [PY,NY,MY] = prob(Y)
+    PX = prob(X)
+    PY = prob(Y)
 
     D = dict()
     tot = 0
 
     #aqui contamos los simbolos
-    for i in range(NX):
-        for j in range(NY):
-            D[X[i],Y[i]] =  D.get((X[i],Y[i]),0) + 1
-            tot += 1
+    for x,y in zip(X,Y):
+        D[(x,y)] = D.get( (x,y), 0 ) + 1
+        tot += 1
 
     #determinamos la probabilidad de aparicion de cada
     #elemento conjunto
     for idx in D:
         D[idx] /= float(tot)
 
-    #prob no nula
-    M = filter( lambda x: D[x]>0, D)
+    return [PX, PY, D] 
 
-    return [PX, PY, D, len(M)]
-
-def H(X):
+def H(X,base=2):
     """
     Regresa la Entropia de Shannon de p en los estados que deben venir
     en un diccionario como esta definido in prob, las unidades de
@@ -108,34 +102,19 @@ def H(X):
 
     regresa H: float con la entropia de X
     """
-    H = 0.0
+    H = sum( -1* np.log(np.array(list(X.values())))/np.log(base))
 
-    for j in range(len(X)):
-        logP = 0.0;
-        if (X.values()[j] > 0):
-            logP = math.log(X.values()[j],2)
-        H += X.values()[j] * logP
-    #H = -H / log(2)
+    return H
 
-    return -H
-
-def Hxy(P):
+def Hxy(P,base=2):
     """
     calcula la entropia conjunta
     recibe P: entropia de estados conjuntos calculada en prconj
 
     regresa la entropía conjunta entre dos sistemas
+
     """
-    HXY = 0.0
-    for idx in P:
-            logP = 0.0;
-            if P[idx] > 0:
-                    logP = math.log(P[idx],2)
-            HXY += P[idx] * logP
-    #HXY = -HXY / math.log(2)
-
-    return -HXY
-
+    return H(P,base)
 
 def entropia(X):
     """
@@ -170,7 +149,7 @@ def im(X,Y):
     calcula la información mutua entre el conjunto de datos
     X e Y
     """
-    PX, PY, PXY, M = prconj(X,Y)
+    PX, PY, PXY = prconj(X,Y)
     #print(PX)
     h1, h2 = H(PX), H(PY)
     hxy = Hconj(X,Y)
@@ -190,4 +169,11 @@ def imc(X,Y):
     Ic = I + delta
     return (Ic, I, delta)
 
+def mapea_val( S, el ):
+    """
+    Asigna la entropia puntual de el respecto
+    de los valores en S donde se encuentra
+    contenido
+    """
+    pass
 
